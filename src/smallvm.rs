@@ -1,5 +1,5 @@
 use log::{debug, trace};
-use num_bigint::{BigInt, ToBigInt};
+use num_bigint::{ToBigInt};
 use num_traits::{Pow, ToPrimitive};
 use py27_marshal::bstr::BString;
 use py27_marshal::*;
@@ -318,7 +318,7 @@ where
                         }
                         Some(Obj::String(right)) => {
                             panic!("{:?}", right);
-                            return Err(crate::error::ExecutionError::ComplexExpression(instr.clone(), Some(tos1.unwrap().typ())).into());
+                            //return Err(crate::error::ExecutionError::ComplexExpression(instr.clone(), Some(tos1.unwrap().typ())).into());
                         }
                         Some(right)=> panic!("unsupported RHS. left: {:?}, right: {:?}. operator: {}", tos1.unwrap().typ(), right.typ(), operator_str),
                         None => stack.push((None, tos_accesses)),
@@ -1410,7 +1410,7 @@ where
             let (value, value_accesses) = stack.pop().unwrap();
             let (dict, dict_accesses) = stack.pop().unwrap();
 
-            let mut new_accesses = dict_accesses;
+            let new_accesses = dict_accesses;
             new_accesses.extend(&value_accesses);
             new_accesses.extend(&key_accesses);
             new_accesses.push(access_tracking);
@@ -1488,7 +1488,7 @@ pub enum ParsedInstr<O: Opcode<Mnemonic = py27::Mnemonic>> {
     Bad,
 }
 
-impl<O: Opcode<Mnemonic = py27::Mnemonic>>  ParsedInstr<O> {
+impl<O: Opcode<Mnemonic = py27::Mnemonic>> ParsedInstr<O> {
     #[track_caller]
     pub fn unwrap(&self) -> Arc<Instruction<O>> {
         if let ParsedInstr::Good(ins) = self {
@@ -1683,7 +1683,8 @@ where
             }
         }
 
-        if instr.opcode.mnemonic() != Mnemonic::RETURN_VALUE && instr.opcode.mnemonic() != Mnemonic::RAISE_VARARGS
+        if instr.opcode.mnemonic() != Mnemonic::RETURN_VALUE
+            && instr.opcode.mnemonic() != Mnemonic::RAISE_VARARGS
         {
             queue!(next_instr_offset, state.force_queue_next());
         }
@@ -2287,7 +2288,7 @@ pub(crate) mod tests {
         let key = Long!(0);
         let value = Long!(0x41);
 
-        let mut expected_list = vec![0x41];
+        let _expected_list = vec![0x41];
 
         let actual_list = Obj::List(Arc::new(RwLock::new(vec![Long!(0)])));
         let consts = vec![actual_list.clone(), key, value];
